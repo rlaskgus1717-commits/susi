@@ -592,10 +592,23 @@ function showPage(id) {
 function goBack() { showPage(backTarget); }
 
 // ═══════════════════════════════
-//  API  (JSONP — CORS 우회)
+//  API
 // ═══════════════════════════════
 function api(params) {
   if (!SCRIPT_URL) { openSetup(); return Promise.reject(new Error('URL 미설정')); }
+
+  // 저장 작업은 POST (JSONP GET은 URL 길이 한계로 데이터 손실)
+  if (params.action === 'save' || params.action === 'adminSave') {
+    return fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(params)
+    })
+    .then(r => { if (!r.ok) throw new Error('서버 오류 ' + r.status); return r.json(); })
+    .then(data => { if (!data.ok) throw new Error(data.err || '서버 오류'); return data; });
+  }
+
+  // 읽기 작업은 JSONP (CORS 우회)
   return new Promise((resolve, reject) => {
     const cbName = '_susi' + Date.now() + Math.floor(Math.random() * 9999);
     const timeout = setTimeout(() => {
@@ -856,7 +869,7 @@ async function saveStudent() {
   loading('저장 중...');
   document.getElementById('sf-save-btn').disabled = true;
   try {
-    await api({ action: 'save', data: enc(updated) });
+    await api({ action: 'save', student: updated });
     me = { ...updated, updatedAt: now() };
     document.getElementById('sf-time').textContent = `마지막 저장: ${me.updatedAt}`;
     updateProg('sf-prog', me.unis);
@@ -987,7 +1000,7 @@ async function adminSave() {
   };
   loading('저장 중...');
   try {
-    await api({ action: 'adminSave', pw: adminPw, data: enc(updated) });
+    await api({ action: 'adminSave', pw: adminPw, student: updated });
     const t = now();
     updated.updatedAt = t;
     const idx = students.findIndex(s=>s.id===updated.id);
