@@ -540,7 +540,8 @@ input::placeholder,textarea::placeholder{color:var(--g400);}
 //  CONFIG & STATE
 // ═══════════════════════════════
 const URL_KEY = 'susi_url';
-let SCRIPT_URL = localStorage.getItem(URL_KEY) || '';
+const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbzwiSmUceRKPlY2D714bMwyyQ8GXMPis0lYyLtO_Cs-DWWDbD3U-xt2ZqzP9akUbSK7/exec';
+let SCRIPT_URL = localStorage.getItem(URL_KEY) || DEFAULT_URL;
 
 let me = null;           // 현재 로그인한 학생 데이터
 let adminPw = '';
@@ -1060,7 +1061,7 @@ function toast(msg, type='') {
 // ═══════════════════════════════
 //  INIT
 // ═══════════════════════════════
-if (!SCRIPT_URL) openSetup();
+// URL이 기본값으로 설정되므로 초기 설정 화면 불필요
 </script>
 </body>
 </html>
